@@ -11,6 +11,7 @@
 # Remove all the folders.
 /gradlew
 /gradle
+/config.xml
 /local.properties
 /.idea/workspace.xml
 /.idea/libraries

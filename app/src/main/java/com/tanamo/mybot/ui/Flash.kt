@@ -38,7 +38,7 @@ class Flash : AppCompatActivity() {
 
 
         if (!PrefM(this@Flash).isFirstTimeLaunch()) {
-            val intent = Intent(this, MainActivity::class.java)
+            val intent = Intent(this, Chat::class.java)
             startActivity(intent)
             this@Flash.finish()
         } else {
@@ -50,7 +50,7 @@ class Flash : AppCompatActivity() {
         PrefM(this@Flash).setFirstTimeLaunch(false)
         Handler().postDelayed({
             this@Flash.finish()
-            val mainIntent = Intent(this@Flash, MainActivity::class.java)
+            val mainIntent = Intent(this@Flash, Chat::class.java)
             this@Flash.startActivity(mainIntent)
         }, COUNTS.toLong()) //
 
