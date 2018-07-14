@@ -8,14 +8,8 @@ class Messo : Serializable {
     var message: String = ""
 
 
-    constructor(id: String, message: String) {
-        this.id = id
-        this.message = message
+    constructor() {}
 
-
-    }
-
-    constructor()
 
 }
 

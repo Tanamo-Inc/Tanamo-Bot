@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_marginRight="10dp"
-        android:background="@drawable/bg_bubble_self"
+        android:background="@drawable/ch_in"
         android:textIsSelectable="true"
         android:textSize="14sp"
         android:textColor="@android:color/white"/>

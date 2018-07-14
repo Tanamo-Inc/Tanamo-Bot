@@ -1,5 +1,6 @@
 package com.tanamo.mybot.adapter
 
+
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -7,34 +8,29 @@ import android.view.ViewGroup
 import android.widget.TextView
 import com.tanamo.mybot.R
 import com.tanamo.mybot.model.Messo
+import kotlinx.android.synthetic.main.watson_item.view.*
 import java.util.*
 
 
 class Chato(private val lise: ArrayList<Messo>) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    private val self = 100
+    private val self = 60
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val itemView: View = if (viewType == self) {
             // self message
-            LayoutInflater.from(parent.context)
-                    .inflate(R.layout.chat_item_self, parent, false)
+            LayoutInflater.from(parent.context).inflate(R.layout.self_item, parent, false)
         } else {
             // WatBot message
-            LayoutInflater.from(parent.context)
-                    .inflate(R.layout.chat_item, parent, false)
+            LayoutInflater.from(parent.context).inflate(R.layout.watson_item, parent, false)
         }
-
-        // view type is to identify where to render the chat message
-        // left or right
-
 
         return ViewHolder(itemView)
     }
 
     override fun getItemViewType(position: Int): Int {
         val message = lise[position]
-        return if (message.id == "1") {
+        return if (message.id == "50") {
             self
         } else position
 
@@ -50,8 +46,8 @@ class Chato(private val lise: ArrayList<Messo>) : RecyclerView.Adapter<RecyclerV
         return lise.size
     }
 
-    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        internal var message: TextView = itemView.findViewById(R.id.message)
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        var message: TextView = itemView.message
 
     }
 

@@ -24,7 +24,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <activity android:name=".ui.Flash">
+        <activity
+            android:name=".ui.Flash"
+            android:theme="@style/ToolBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -33,7 +35,9 @@
         </activity>
 
 
-        <activity android:name=".ui.Chat">
+        <activity
+            android:name=".ui.Chat"
+            android:theme="@style/ToolBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -17,17 +17,16 @@ object Kons {
 
     const val COUNTS = 3000
     const val TAGG = "tanamo"
-    var workSpaceId: String = ""
-    var cName: String = ""
+    const val REQUEST_RECORD_AUDIO_PERMISSION = 300
+    const val RECORD_REQUEST_CODE = 101
+
+    var workSpaceId: String? = null
+    var cUsername: String = ""
     var cPassword: String = ""
     var sttUsername: String = ""
     var sttPassword: String = ""
     var ttsUsername: String = ""
-    var ttsPassword: String = ""
-
-    const val REQUEST_RECORD_AUDIO_PERMISSION = 100
-    const val RECORD_REQUEST_CODE = 101
-
+    var ttsPassword: String? = ""
 
     fun initToast(c: Context, message: String) {
         Toast.makeText(c, message, Toast.LENGTH_SHORT).show()

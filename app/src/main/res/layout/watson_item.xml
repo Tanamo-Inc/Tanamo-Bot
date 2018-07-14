@@ -4,11 +4,11 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal">
 
-    <android.support.v7.widget.AppCompatImageView
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:layout_width="55dp"
+        android:layout_height="55dp"
         android:layout_marginLeft="5dp"
-        android:src="@mipmap/ic_launcher" />
+        android:src="@drawable/ic" />
 
     <TextView
         android:id="@+id/message"
@@ -20,7 +20,7 @@
         android:layout_marginRight="5dp"
         android:layout_marginTop="5dp"
         android:autoLink="web"
-        android:background="@drawable/bg_bubble_watbot"
+        android:background="@drawable/ch_out"
         android:textColor="@android:color/black"
         android:textIsSelectable="true"
         android:textSize="14sp" />

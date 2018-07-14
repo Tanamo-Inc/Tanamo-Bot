@@ -10,6 +10,8 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import com.ibm.watson.developer_cloud.android.library.audio.MicrophoneHelper
@@ -31,8 +33,8 @@ import com.tanamo.mybot.model.Clicker
 import com.tanamo.mybot.model.Kons.RECORD_REQUEST_CODE
 import com.tanamo.mybot.model.Kons.REQUEST_RECORD_AUDIO_PERMISSION
 import com.tanamo.mybot.model.Kons.TAGG
-import com.tanamo.mybot.model.Kons.cName
 import com.tanamo.mybot.model.Kons.cPassword
+import com.tanamo.mybot.model.Kons.cUsername
 import com.tanamo.mybot.model.Kons.connect
 import com.tanamo.mybot.model.Kons.initToast
 import com.tanamo.mybot.model.Kons.sttPassword
@@ -42,26 +44,26 @@ import com.tanamo.mybot.model.Kons.ttsUsername
 import com.tanamo.mybot.model.Kons.workSpaceId
 import com.tanamo.mybot.model.Messo
 import com.tanamo.mybot.model.Toucher
+import kotlinx.android.synthetic.main.chat_main.*
 import kotlinx.android.synthetic.main.content_chat.*
 import java.util.*
 
-
-//todo: Adding to my Messaging App
+//todo : Add to my Messaging App.
 
 class Chat : AppCompatActivity() {
 
     private lateinit var adapter: Chato
     private lateinit var lise: ArrayList<Messo>
-    private lateinit var context: com.ibm.watson.developer_cloud.conversation.v1.model.Context
+    private var wContext: com.ibm.watson.developer_cloud.conversation.v1.model.Context? = null
     private lateinit var streamPlayer: StreamPlayer
     private var initialRequest: Boolean = false
     private var permissionToRecordAccepted = false
     private var listening = false
-    private lateinit var speechService: SpeechToText
-    private lateinit var textToSpeech: TextToSpeech
-    private lateinit var capture: MicrophoneInputStream
-    private lateinit var mContext: Context
-    private lateinit var microphoneHelper: MicrophoneHelper
+    private var speechService: SpeechToText? = null
+    private var textToSpeech: TextToSpeech? = null
+    private var capture: MicrophoneInputStream? = null
+    private var mContext: Context? = null
+    private var microphoneHelper: MicrophoneHelper? = null
 
 
     private val recognizeOptions: RecognizeOptions
@@ -71,39 +73,43 @@ class Chat : AppCompatActivity() {
                 .inactivityTimeout(2000)
                 .build()
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.chat_main)
 
-        config()
-
         init()
-
 
     }
 
     private fun init() {
 
+        toolbar.title = ""
+
+        setSupportActionBar(toolbar)
+
+        config()
+
         lise = ArrayList()
         adapter = Chato(lise)
         microphoneHelper = MicrophoneHelper(this)
 
-        val layoutManager = LinearLayoutManager(this)
-        layoutManager.stackFromEnd = true
-        recycler_view.layoutManager = layoutManager
+        val lay = LinearLayoutManager(this)
+        lay.stackFromEnd = true
+        recycler_view.layoutManager = lay
         recycler_view.itemAnimator = DefaultItemAnimator()
         recycler_view.adapter = adapter
         this.message.setText("")
         this.initialRequest = true
         sendMessage()
 
+
         //Watson Text-to-Speech Service on Bluemix
         textToSpeech = TextToSpeech()
-        textToSpeech.setUsernameAndPassword(ttsUsername, ttsPassword)
+        textToSpeech!!.setUsernameAndPassword(ttsUsername, ttsPassword)
 
 
-        val permission = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+        val permission = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.RECORD_AUDIO)
 
         if (permission != PackageManager.PERMISSION_GRANTED) {
             Log.i(TAGG, "Permission to record denied")
@@ -121,9 +127,9 @@ class Chat : AppCompatActivity() {
                         streamPlayer = StreamPlayer()
                         if (!audioMessage.message.isEmpty())
                         //Change the Voice format and choose from the available choices
-                            streamPlayer.playStream(textToSpeech.synthesize(audioMessage.message, Voice.EN_LISA).execute())
+                            streamPlayer.playStream(textToSpeech!!.synthesize(audioMessage.message, Voice.EN_LISA).execute())
                         else
-                            streamPlayer.playStream(textToSpeech.synthesize("No Text Specified", Voice.EN_LISA).execute())
+                            streamPlayer.playStream(textToSpeech!!.synthesize("No Text Specified", Voice.EN_LISA).execute())
 
                     } catch (e: Exception) {
                         e.printStackTrace()
@@ -141,27 +147,25 @@ class Chat : AppCompatActivity() {
         btn_send.setOnClickListener {
             if (connect(this@Chat)) {
                 sendMessage()
-            } else {
-                initToast(this, " No Internet Connection available ")
-
             }
-
         }
 
-        btn_record.setOnClickListener { recordMessage() }
+        ///    btn_record.setOnClickListener { recordMessage() }
 
 
     }
 
     private fun config() {
+
         mContext = applicationContext
-        workSpaceId = mContext.getString(R.string.workSpaceId)
-        cName = mContext.getString(R.string.cName)
-        cPassword = mContext.getString(R.string.cPassword)
-        sttUsername = mContext.getString(R.string.sttUsername)
-        sttPassword = mContext.getString(R.string.sttPassword)
-        ttsUsername = mContext.getString(R.string.ttsUsername)
-        ttsPassword = mContext.getString(R.string.ttsPassword)
+        cUsername = mContext!!.getString(R.string.conversation_username)
+        cPassword = mContext!!.getString(R.string.conversation_password)
+        workSpaceId = mContext!!.getString(R.string.workSpaceId)
+        sttUsername = mContext!!.getString(R.string.STT_username)
+        sttPassword = mContext!!.getString(R.string.STT_password)
+        ttsUsername = mContext!!.getString(R.string.TTS_username)
+        ttsPassword = mContext!!.getString(R.string.TTS_password)
+
     }
 
     // Speech-to-Text Record Audio permission
@@ -186,7 +190,7 @@ class Chat : AppCompatActivity() {
                 }
             }
         }
-        // if (!permissionToRecordAccepted ) finish();
+
 
     }
 
@@ -196,43 +200,41 @@ class Chat : AppCompatActivity() {
 
     // Sending a message to Watson Conversation Service
     private fun sendMessage() {
-
-        val inputmessage = this.message.text.toString().trim { it <= ' ' }
+        val inputs = this.message!!.text.toString().trim { it <= ' ' }
 
         if (!this.initialRequest) {
-            val inputMessage = Messo()
-            inputMessage.message = inputmessage
-            inputMessage.id = "1"
-            lise.add(inputMessage)
-
+            val messo = Messo()
+            messo.message = inputs
+            messo.id = "50"
+            lise.add(messo)
         } else {
-            val inputMessage = Messo()
-            inputMessage.message = inputmessage
-            inputMessage.id = "100"
+            val messo = Messo()
+            messo.message = inputs
+            messo.id = "60"
             this.initialRequest = false
-            Toast.makeText(applicationContext, "Tap on the message for Voice", Toast.LENGTH_LONG).show()
-
+            initToast(applicationContext, "Tap on the message for Voice")
         }
 
-        this.message.setText("")
+        this.message!!.setText("")
         adapter.notifyDataSetChanged()
 
         val thread = Thread(Runnable {
-            try {
 
+            try {
                 val service = Conversation(Conversation.VERSION_DATE_2017_05_26)
-                service.setUsernameAndPassword(cName, cPassword)
-                val input = InputData.Builder(inputmessage).build()
-                val options = MessageOptions.Builder(workSpaceId).input(input).context(context).build()
+                service.setUsernameAndPassword(cUsername, cPassword)
+                val input = InputData.Builder(inputs).build()
+                val options = MessageOptions.Builder(workSpaceId).input(input).context(wContext).build()
                 val response = service.message(options).execute()
 
                 //Passing Context of last conversation
                 if (response!!.context != null) {
-                    //context.clear();
-                    context = response.context
+
+                    wContext = response.context
 
                 }
                 val outMessage = Messo()
+
                 if (response.output != null && response.output.containsKey("text")) {
 
                     val responseList = response.output["text"] as ArrayList<*>
@@ -249,9 +251,9 @@ class Chat : AppCompatActivity() {
                             streamPlayer = StreamPlayer()
                             if (!audioMessage.message.isEmpty())
                             //Change the Voice format and choose from the available choices
-                                streamPlayer.playStream(textToSpeech.synthesize(audioMessage.message, Voice.EN_LISA).execute())
+                                streamPlayer.playStream(textToSpeech!!.synthesize(audioMessage.message, Voice.EN_LISA).execute())
                             else
-                                streamPlayer.playStream(textToSpeech.synthesize("No Text Specified", Voice.EN_LISA).execute())
+                                streamPlayer.playStream(textToSpeech!!.synthesize("No Text Specified", Voice.EN_LISA).execute())
 
                         } catch (e: Exception) {
                             e.printStackTrace()
@@ -263,11 +265,10 @@ class Chat : AppCompatActivity() {
                 runOnUiThread {
                     adapter.notifyDataSetChanged()
                     if (adapter.itemCount > 1) {
-                        recycler_view.layoutManager.smoothScrollToPosition(recycler_view, null, adapter.itemCount - 1)
+                        recycler_view!!.layoutManager.smoothScrollToPosition(recycler_view, null, adapter.itemCount - 1)
 
                     }
                 }
-
 
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -280,28 +281,27 @@ class Chat : AppCompatActivity() {
 
     //Record a message via Watson Speech to Text
     private fun recordMessage() {
-
         speechService = SpeechToText()
-        speechService.setUsernameAndPassword(sttUsername, sttPassword)
+        speechService!!.setUsernameAndPassword(sttUsername, sttPassword)
 
 
         if (!listening) {
-            capture = microphoneHelper.getInputStream(true)
+            capture = microphoneHelper!!.getInputStream(true)
             Thread(Runnable {
                 try {
-                    speechService.recognizeUsingWebSocket(capture, recognizeOptions, MicrophoneRecognizeDelegate())
+                    speechService!!.recognizeUsingWebSocket(capture!!, recognizeOptions, MicrophoneRecognizeDelegate())
                 } catch (e: Exception) {
                     showError(e)
                 }
             }).start()
             listening = true
-            Toast.makeText(this@Chat, "Listening....Click to Stop", Toast.LENGTH_LONG).show()
+            initToast(this@Chat, "Listening....Click to Stop")
 
         } else {
             try {
-                microphoneHelper.closeInputStream()
+                microphoneHelper!!.closeInputStream()
                 listening = false
-                Toast.makeText(this@Chat, "Stopped Listening....Click to Start", Toast.LENGTH_LONG).show()
+                initToast(this@Chat, "Stopped Listening....Click to Start")
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -311,7 +311,9 @@ class Chat : AppCompatActivity() {
 
     //Watson Speech to Text Methods.
     private inner class MicrophoneRecognizeDelegate : RecognizeCallback {
+
         override fun onTranscription(speechResults: SpeechResults) {
+
             if (speechResults.results != null && !speechResults.results.isEmpty()) {
                 val text = speechResults.results[0].alternatives[0].transcript
                 showMicText(text)
@@ -324,11 +326,11 @@ class Chat : AppCompatActivity() {
 
         override fun onError(e: Exception) {
             showError(e)
-            enableMicButton()
+
         }
 
         override fun onDisconnected() {
-            enableMicButton()
+            // enableMicButton()
         }
 
         override fun onInactivityTimeout(runtimeException: RuntimeException) {
@@ -342,21 +344,39 @@ class Chat : AppCompatActivity() {
         override fun onTranscriptionComplete() {
 
         }
+
     }
 
     private fun showMicText(text: String) {
         runOnUiThread { message.setText(text) }
     }
 
-    private fun enableMicButton() {
-        runOnUiThread { btn_record.isEnabled = true }
-    }
 
     private fun showError(e: Exception) {
         runOnUiThread {
             Toast.makeText(this@Chat, e.message, Toast.LENGTH_SHORT).show()
             e.printStackTrace()
         }
+    }
+
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        Log.d(TAGG, "onCreateOptionsMenu: ")
+        menuInflater.inflate(R.menu.start, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        Log.d(TAGG, "onOptionsItemSelected: ")
+        val id = item.itemId
+
+        if (id == R.id.record) {
+            recordMessage()
+            return true
+        }
+
+
+        return super.onOptionsItemSelected(item)
     }
 
 
